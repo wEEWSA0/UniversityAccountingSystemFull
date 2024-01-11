@@ -1,0 +1,25 @@
+<kendo-grid
+    #grid
+    [data]="view | async"
+    [pageSize]="gridState.take"
+    [skip]="gridState.skip"
+    [sort]="gridState.sort"
+    (dataStateChange)="onStateChange($event)"
+    [pageable]="true"
+    [sortable]="true"
+    [navigable]="true"
+>
+    <kendo-grid-column
+    field="id"
+    title="Id"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="name"
+    title="Name"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="floors"
+    editor="numeric"
+    title="Floors"
+    ></kendo-grid-column>
+</kendo-grid>

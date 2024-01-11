@@ -1,0 +1,78 @@
+<p kendoTypography variant="h2" themeColor="light" textAlign="center">Rooms</p>
+
+<kendo-grid
+    #grid
+    [data]="view | async"
+    [pageSize]="gridState.take"
+    [skip]="gridState.skip"
+    [sort]="gridState.sort"
+    [pageable]="true"
+    [sortable]="true"
+    (dataStateChange)="onStateChange($event)"
+    (cellClick)="cellClickHandler($event)"
+    (cellClose)="cellCloseHandler($event)"
+    (cancel)="cancelHandler($event)"
+    (save)="saveHandler($event)"
+    (remove)="removeHandler($event)"
+    (add)="addHandler($event)"
+    [navigable]="true"
+>
+    <ng-template kendoGridToolbarTemplate>
+    <button themeColor="dark" kendoGridAddCommand>Add new</button>
+    <button
+        kendoButton
+        [disabled]="!editService.hasChanges()"
+        (click)="saveChanges(grid)"
+    >
+        Save Changes
+    </button>
+    <button
+        kendoButton
+        [disabled]="!editService.hasChanges()"
+        (click)="cancelChanges(grid)"
+    >
+        Cancel Changes
+    </button>
+    </ng-template>
+    <kendo-grid-column
+    field="name"
+    title="Name"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="number"
+    editor="numeric"
+    title="Number"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="floor"
+    editor="numeric"
+    title="Floor"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="capacity"
+    editor="numeric"
+    title="Capacity"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="buildingId"
+    title="BuildingId"
+    ></kendo-grid-column>
+    <kendo-grid-column
+    field="roomType"
+    editor="numeric"
+    title="Type"
+    ></kendo-grid-column>
+    <kendo-grid-command-column title="Command" [width]="220">
+    <ng-template kendoGridCellTemplate let-isNew="isNew">
+        <button kendoGridRemoveCommand>Remove</button>
+        <button themeColor="success" kendoGridSaveCommand>Add</button>
+        <button themeColor="error" kendoGridCancelCommand>Cancel</button>
+    </ng-template>
+    </kendo-grid-command-column>
+</kendo-grid>
+
+<br>
+
+<p kendoTypography variant="h3" themeColor="light" textAlign="center">Buildings</p>
+
+<app-buildings-list-static></app-buildings-list-static>

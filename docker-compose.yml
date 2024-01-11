@@ -1,0 +1,110 @@
+version: '3.4'
+
+networks:
+  university-accounting-project:
+    driver: bridge
+
+services:
+  angular-app:
+    container_name: angular-app
+    build: 
+      context: ./UniversityAccountingFront/
+      dockerfile: Dockerfile
+    ports: 
+        - 3000:80
+    networks:
+      - university-accounting-project
+
+
+  rabbitmq:
+    image: rabbitmq:3.12.11-management
+    hostname: rabbitmq
+    restart: always
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit disk_free_limit 2147483648
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - university-accounting-project
+
+
+  accounting-rooms-app:
+    image: docker.io/library/accounting-rooms-app
+    depends_on:
+      - "rabbitmq"
+      - "accounting-rooms-db"
+    container_name: accounting-rooms-app
+    ports:
+      - "5002:82"
+    environment:
+      - ConnectionStrings__DefaultConnection=User ID=postgres;Password=postgres;Server=accounting-rooms-db;Port=5432;Database=accounting_rooms_db; IntegratedSecurity=true;Pooling=true;
+      - RabbitMQ__Queue=BuildingsActionsQueue
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    build: 
+      context: ./AccountingRooms/
+      dockerfile: Dockerfile
+    networks:
+      - university-accounting-project
+
+  accounting-rooms-db:
+    image: postgres:latest
+    container_name: accounting-rooms-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=accounting_rooms_db
+    ports:
+      - "5443:5432"
+    restart: always
+    volumes:
+      - accounting-rooms-data:/var/lib/postgresql/data
+    networks:
+      - university-accounting-project
+
+
+  accounting-buildings-app:
+    image: docker.io/library/accounting-buildings-app
+    depends_on:
+      - "rabbitmq"
+      - "accounting-buildings-db"
+    container_name: accounting-buildings-app
+    ports:
+      - "5001:81"
+    environment:
+      - ConnectionStrings__DefaultConnection=User ID=postgres;Password=postgres;Server=accounting-buildings-db;Port=5432;Database=accounting_buildings_db; IntegratedSecurity=true;Pooling=true;
+      - RabbitMQ__Queue=BuildingsActionsQueue
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__UserName=guest
+      - RabbitMQ__Password=guest
+    build: 
+      context: ./AccountingBuildings/
+      dockerfile: Dockerfile
+    networks:
+      - university-accounting-project
+
+  accounting-buildings-db:
+    image: postgres:latest
+    container_name: accounting-buildings-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=accounting_buildings_db
+    ports:
+      - "5433:5432"
+    restart: always
+    volumes:
+      - accounting-buildings-data:/var/lib/postgresql/data
+    networks:
+      - university-accounting-project
+    
+volumes:
+  accounting-rooms-data:
+  accounting-buildings-data:
